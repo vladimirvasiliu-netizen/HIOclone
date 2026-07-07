@@ -12,6 +12,7 @@ export function useSimulator() {
   const [status, setStatus] = useState<SimulatorStatus>({
     isRunning: false,
     generatedCount: 0,
+    mix: { glovo: 50, boltFood: 50 },
   });
   const [isToggling, setIsToggling] = useState(false);
 

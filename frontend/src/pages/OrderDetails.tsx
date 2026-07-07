@@ -26,16 +26,12 @@ export default function OrderDetails() {
   }, [id]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-3xl px-6 py-4">
-          <Link to="/dashboard" className="text-sm text-blue-600 hover:underline">
-            &larr; Inapoi la comenzi
-          </Link>
-        </div>
-      </header>
+    <div className="mx-auto max-w-3xl">
+      <Link to="/dashboard" className="text-sm text-blue-600 hover:underline">
+        &larr; Inapoi la comenzi
+      </Link>
 
-      <main className="mx-auto max-w-3xl px-6 py-6">
+      <div className="mt-4">
         {isLoading && (
           <div className="flex h-48 items-center justify-center text-slate-400">
             Se incarca comanda...
@@ -94,7 +90,7 @@ export default function OrderDetails() {
             </div>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

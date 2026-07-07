@@ -1,11 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import App from './App';
 import Login from './pages/Login';
+import Orders from './pages/Orders';
+import Fleets from './pages/Fleets';
+import RoutingRules from './pages/RoutingRules';
 import OrderDetails from './pages/OrderDetails';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { Layout } from './components/layout/Layout';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -14,22 +17,21 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
+
+          {/* Rute protejate: toate impartasesc shell-ul (sidebar + topbar) via Layout */}
           <Route
-            path="/dashboard"
             element={
               <ProtectedRoute>
-                <App />
+                <Layout />
               </ProtectedRoute>
             }
-          />
-          <Route
-            path="/orders/:id"
-            element={
-              <ProtectedRoute>
-                <OrderDetails />
-              </ProtectedRoute>
-            }
-          />
+          >
+            <Route path="/dashboard" element={<Orders />} />
+            <Route path="/fleets" element={<Fleets />} />
+            <Route path="/rules" element={<RoutingRules />} />
+            <Route path="/orders/:id" element={<OrderDetails />} />
+          </Route>
+
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>

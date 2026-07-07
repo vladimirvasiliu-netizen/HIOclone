@@ -1,6 +1,7 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { SimulatorService } from './simulator.service';
+import { SetMixDto } from './dto/set-mix.dto';
 
 @ApiTags('simulator')
 @Controller('simulator')
@@ -20,5 +21,10 @@ export class SimulatorController {
   @Get('status')
   status() {
     return this.simulatorService.status();
+  }
+
+  @Post('mix')
+  setMix(@Body() dto: SetMixDto) {
+    return this.simulatorService.setMix(dto.glovo);
   }
 }

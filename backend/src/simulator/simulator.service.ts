@@ -30,11 +30,29 @@ export class SimulatorService {
   private isRunning = false;
   private timeoutHandle: NodeJS.Timeout | null = null;
   private generatedCount = 0;
+  /** Procentul de comenzi generate pentru Glovo (0-100). Bolt Food = 100 - glovoShare. */
+  private glovoShare = 50;
 
   constructor(private readonly ordersService: OrdersService) {}
 
   status() {
-    return { isRunning: this.isRunning, generatedCount: this.generatedCount };
+    return {
+      isRunning: this.isRunning,
+      generatedCount: this.generatedCount,
+      mix: { glovo: this.glovoShare, boltFood: 100 - this.glovoShare },
+    };
+  }
+
+  /**
+   * Seteaza distributia comenzilor generate. Primeste procentul pentru Glovo;
+   * Bolt Food primeste automat restul, ca suma sa fie mereu 100.
+   */
+  setMix(glovoPercent: number) {
+    this.glovoShare = Math.max(0, Math.min(100, Math.round(glovoPercent)));
+    this.logger.log(
+      `Distributie comenzi: Glovo ${this.glovoShare}% / Bolt Food ${100 - this.glovoShare}%`,
+    );
+    return this.status();
   }
 
   start() {
@@ -69,7 +87,11 @@ export class SimulatorService {
   }
 
   private async generateOrder(): Promise<void> {
-    const platform = pickRandom([OrderPlatform.BOLT_FOOD, OrderPlatform.GLOVO]);
+    // Alegere ponderata: cu cat glovoShare e mai mare, cu atat mai multe Glovo.
+    const platform =
+      randomInt(1, 100) <= this.glovoShare
+        ? OrderPlatform.GLOVO
+        : OrderPlatform.BOLT_FOOD;
     const itemCount = randomInt(1, 4);
     const items: UnifiedOrderItem[] = Array.from({ length: itemCount }).map(() => {
       const menuItem = pickRandom(SIMULATED_MENU_ITEMS);
