@@ -1,0 +1,21 @@
+# Dependinte instalate (se recreeaza cu `npm install`)
+node_modules/
+
+# Build-uri / output compilat
+dist/
+build/
+
+# Variabile de mediu cu secrete (se comite doar .env.example)
+.env
+.env.local
+.env.*.local
+
+# Loguri
+*.log
+npm-debug.log*
+
+# Fisiere de sistem / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
