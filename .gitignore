@@ -4,6 +4,11 @@ node_modules/
 # Build-uri / output compilat
 dist/
 build/
+*.tsbuildinfo
+
+# Config compilat automat din .ts (se regenereaza)
+frontend/vite.config.js
+frontend/vite.config.d.ts
 
 # Variabile de mediu cu secrete (se comite doar .env.example)
 .env
