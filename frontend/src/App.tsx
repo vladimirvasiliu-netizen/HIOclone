@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useOrders } from './hooks/useOrders';
 import { updateOrderStatus } from './api/ordersApi';
+import { useAuth } from './context/AuthContext';
 import { FilterBar } from './components/FilterBar';
 import { OrderList } from './components/OrderList';
 import { SimulatorControls } from './components/SimulatorControls';
@@ -9,6 +11,14 @@ import type { OrderPlatform, OrderStatus } from './types/order';
 export default function App() {
   const [platform, setPlatform] = useState<OrderPlatform | undefined>(undefined);
   const [status, setStatus] = useState<OrderStatus | undefined>(undefined);
+
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   const { orders, isLoading, error, refetch } = useOrders({ platform, status });
 
@@ -38,6 +48,13 @@ export default function App() {
                 {newOrdersCount} comenzi noi
               </span>
             )}
+            {user && <span className="text-sm text-slate-500">{user.email}</span>}
+            <button
+              onClick={handleLogout}
+              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
+            >
+              Deconectare
+            </button>
           </div>
         </div>
       </header>

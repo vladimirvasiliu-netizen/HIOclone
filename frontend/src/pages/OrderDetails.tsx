@@ -29,7 +29,7 @@ export default function OrderDetails() {
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-3xl px-6 py-4">
-          <Link to="/" className="text-sm text-blue-600 hover:underline">
+          <Link to="/dashboard" className="text-sm text-blue-600 hover:underline">
             &larr; Inapoi la comenzi
           </Link>
         </div>
