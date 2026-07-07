@@ -103,6 +103,7 @@ export class SimulatorService {
     });
 
     const totalPrice = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+    const deliveryFee = randomInt(5, 15);
     const placedAt = new Date();
     const estimatedDeliveryAt = new Date(
       placedAt.getTime() + randomInt(MIN_DELIVERY_MINUTES, MAX_DELIVERY_MINUTES) * 60_000,
@@ -116,6 +117,7 @@ export class SimulatorService {
       customerPhone: `07${randomInt(10000000, 99999999)}`,
       deliveryAddress: pickRandom(SIMULATED_STREETS),
       totalPrice,
+      deliveryFee,
       currency: 'RON',
       items,
       rawPayload: { simulated: true, generatedAt: placedAt.toISOString() },

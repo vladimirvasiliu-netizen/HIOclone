@@ -11,6 +11,12 @@ import { OrderPlatform } from '../../common/enums/order-platform.enum';
 import { OrderStatus } from '../../common/enums/order-status.enum';
 import { OrderItem } from './order-item.entity';
 
+/** O intrare din istoricul de status: ce status si cand a fost setat. */
+export interface StatusHistoryEntry {
+  status: OrderStatus;
+  at: string; // ISO timestamp
+}
+
 @Entity('orders')
 @Index(['platform', 'externalOrderId'], { unique: true })
 export class Order {
@@ -39,6 +45,9 @@ export class Order {
   @Column({ name: 'total_price', type: 'decimal', precision: 10, scale: 2 })
   totalPrice: number;
 
+  @Column({ name: 'delivery_fee', type: 'decimal', precision: 10, scale: 2, default: 0 })
+  deliveryFee: number;
+
   @Column({ default: 'RON' })
   currency: string;
 
@@ -51,6 +60,10 @@ export class Order {
   /** Payload-ul original primit de la platforma - util pentru debugging/audit */
   @Column({ name: 'raw_payload', type: 'jsonb' })
   rawPayload: Record<string, unknown>;
+
+  /** Istoricul schimbarilor de status, cu ora fiecarei tranzitii. */
+  @Column({ name: 'status_history', type: 'jsonb', default: () => "'[]'" })
+  statusHistory: StatusHistoryEntry[];
 
   @Column({ name: 'placed_at', type: 'timestamptz' })
   placedAt: Date;

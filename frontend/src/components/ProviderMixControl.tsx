@@ -34,13 +34,10 @@ export function ProviderMixControl() {
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-800">Distributie comenzi simulate</h2>
         {isSaving && <span className="text-xs text-slate-400">Se salveaza...</span>}
       </div>
-      <p className="mb-4 mt-1 text-xs text-slate-500">
-        Proportia in care vin comenzile pe fiecare platforma. Suma e mereu 100%.
-      </p>
 
       {/* Glovo */}
       <div className="mb-3">

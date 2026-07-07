@@ -38,6 +38,12 @@ export class OrdersService {
 
   async updateStatus(id: string, status: OrderStatus): Promise<Order> {
     const order = await this.findOne(id);
+    if (order.status !== status) {
+      order.statusHistory = [
+        ...(order.statusHistory ?? []),
+        { status, at: new Date().toISOString() },
+      ];
+    }
     order.status = status;
     return this.ordersRepository.save(order);
   }
@@ -57,6 +63,12 @@ export class OrdersService {
     });
 
     if (existing) {
+      if (existing.status !== unifiedOrder.status) {
+        existing.statusHistory = [
+          ...(existing.statusHistory ?? []),
+          { status: unifiedOrder.status, at: new Date().toISOString() },
+        ];
+      }
       existing.status = unifiedOrder.status;
       existing.rawPayload = unifiedOrder.rawPayload;
       if (unifiedOrder.estimatedDeliveryAt) {
@@ -87,10 +99,12 @@ export class OrdersService {
       customerPhone: unifiedOrder.customerPhone,
       deliveryAddress: unifiedOrder.deliveryAddress,
       totalPrice: unifiedOrder.totalPrice,
+      deliveryFee: unifiedOrder.deliveryFee,
       currency: unifiedOrder.currency,
       rawPayload: unifiedOrder.rawPayload,
       placedAt: unifiedOrder.placedAt,
       estimatedDeliveryAt: unifiedOrder.estimatedDeliveryAt,
+      statusHistory: [{ status: unifiedOrder.status, at: new Date().toISOString() }],
       items,
     });
 

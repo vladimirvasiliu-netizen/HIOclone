@@ -13,6 +13,7 @@ export interface GlovoWebhookPayload {
   delivery_address?: string;
   currency_code: string;
   order_total_price: number;
+  delivery_fee?: number;
   order_items: Array<{
     id?: string;
     name: string;

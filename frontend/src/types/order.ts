@@ -19,15 +19,22 @@ export interface OrderItem {
   notes?: string;
 }
 
+export interface StatusHistoryEntry {
+  status: OrderStatus;
+  at: string;
+}
+
 export interface Order {
   id: string;
   platform: OrderPlatform;
   externalOrderId: string;
   status: OrderStatus;
+  statusHistory?: StatusHistoryEntry[];
   customerName?: string;
   customerPhone?: string;
   deliveryAddress?: string;
   totalPrice: string | number;
+  deliveryFee: string | number;
   currency: string;
   items: OrderItem[];
   placedAt: string;

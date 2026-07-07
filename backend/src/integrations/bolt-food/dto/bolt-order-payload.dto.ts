@@ -14,6 +14,7 @@ export interface BoltFoodOrderPayload {
   deliveryAddress?: string;
   currency: string;
   totalPrice: number;
+  deliveryFee?: number;
   items: Array<{
     id?: string;
     name: string;

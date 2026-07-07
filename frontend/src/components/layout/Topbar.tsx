@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { getOrders } from '../../api/ordersApi';
-import type { Order } from '../../types/order';
+import type { Order, OrderPlatform } from '../../types/order';
 import { getPageTitle } from './navConfig';
 import { IconBell, IconSearch } from './icons';
 
@@ -15,7 +15,7 @@ import { IconBell, IconSearch } from './icons';
  *  - 'none'  -> pur informativa, fara actiune
  */
 type NotificationTarget =
-  | { type: 'order' }
+  | { type: 'order'; platform?: OrderPlatform }
   | { type: 'route'; path: string }
   | { type: 'none' };
 
@@ -27,10 +27,31 @@ interface Notification {
 }
 
 const MOCK_NOTIFICATIONS: Notification[] = [
-  { id: 1, title: 'Comanda noua primita de la Glovo', time: 'acum 2 min', target: { type: 'order' } },
+  { id: 1, title: 'Comanda noua de la Glovo', time: 'acum 2 min', target: { type: 'order', platform: 'GLOVO' } },
   { id: 2, title: 'Flota Bolt Food a revenit online', time: 'acum 15 min', target: { type: 'route', path: '/fleets' } },
-  { id: 3, title: 'SLA depasit pentru o comanda', time: 'acum 1 ora', target: { type: 'order' } },
+  { id: 3, title: 'SLA depasit pentru comanda', time: 'acum 1 ora', target: { type: 'order' } },
 ];
+
+/**
+ * Notificarile citite se tin minte PER UTILIZATOR (cheia include email-ul),
+ * ca fiecare cont sa-si aiba propria stare, nu una comuna pe browser.
+ */
+const READ_STORAGE_PREFIX = 'read-notifications';
+
+function readStorageKey(email: string | undefined): string {
+  return `${READ_STORAGE_PREFIX}:${email ?? 'anon'}`;
+}
+
+function readStoredReadIds(key: string): number[] {
+  const raw = localStorage.getItem(key);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 export function Topbar() {
   const location = useLocation();
@@ -39,7 +60,10 @@ export function Topbar() {
 
   const [notifOpen, setNotifOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [readIds, setReadIds] = useState<number[]>([]); // notificarile deja deschise
+  // Cheie de stocare legata de utilizatorul curent (per cont, nu per browser).
+  const storageKey = readStorageKey(user?.email);
+  // Notificarile deja deschise - citite din localStorage, ca sa persiste intre sesiuni.
+  const [readIds, setReadIds] = useState<number[]>(() => readStoredReadIds(storageKey));
   const [orders, setOrders] = useState<Order[]>([]); // comenzi reale, pt. link-uri specifice
 
   const notifRef = useRef<HTMLDivElement>(null);
@@ -54,6 +78,12 @@ export function Topbar() {
       .catch(() => setOrders([]));
   }, []);
 
+  // Ori de cate ori se schimba notificarile citite, le salvam sub cheia userului.
+  useEffect(() => {
+    if (!user) return;
+    localStorage.setItem(storageKey, JSON.stringify(readIds));
+  }, [user, storageKey, readIds]);
+
   const title = getPageTitle(location.pathname);
   const initials = (user?.name ?? 'U').charAt(0).toUpperCase();
 
@@ -62,16 +92,34 @@ export function Topbar() {
     (n) => n.id,
   );
 
+  /** Gaseste comanda reala asociata unei notificari de tip 'order'. */
+  const resolveOrder = (n: Notification): Order | null => {
+    const target = n.target;
+    if (target.type !== 'order') return null;
+    // daca notificarea vizeaza o platforma anume, preferam o comanda de acolo
+    if (target.platform) {
+      const match = orders.find((o) => o.platform === target.platform);
+      if (match) return match;
+    }
+    const index = orderNotifIds.indexOf(n.id);
+    return orders[index] ?? orders[0] ?? null;
+  };
+
   /** Rezolva destinatia unei notificari (null = fara actiune). */
   const resolveLink = (n: Notification): string | null => {
     if (n.target.type === 'route') return n.target.path;
     if (n.target.type === 'order') {
-      const index = orderNotifIds.indexOf(n.id);
-      const order = orders[index] ?? orders[0];
+      const order = resolveOrder(n);
       // daca avem o comanda reala -> pagina ei; altfel, lista de comenzi
-      return order ? `/orders/${order.id}` : '/dashboard';
+      return order ? `/orders/${order.id}` : '/orders';
     }
     return null;
+  };
+
+  /** Textul afisat: pentru comenzi, adauga numarul comenzii (#externalOrderId). */
+  const displayTitle = (n: Notification): string => {
+    const order = resolveOrder(n);
+    return order ? `${n.title} #${order.externalOrderId}` : n.title;
   };
 
   const unreadCount = MOCK_NOTIFICATIONS.filter((n) => !readIds.includes(n.id)).length;
@@ -147,7 +195,7 @@ export function Topbar() {
                             : 'font-semibold text-slate-900'
                         }`}
                       >
-                        {n.title}
+                        {displayTitle(n)}
                       </span>
                       <span className="block text-xs text-slate-400">{n.time}</span>
                     </span>

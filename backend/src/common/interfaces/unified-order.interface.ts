@@ -23,6 +23,8 @@ export interface UnifiedOrder {
   customerPhone?: string;
   deliveryAddress?: string;
   totalPrice: number;
+  /** Costul livrarii, platit de client peste totalul produselor. */
+  deliveryFee: number;
   currency: string;
   items: UnifiedOrderItem[];
   rawPayload: Record<string, unknown>;

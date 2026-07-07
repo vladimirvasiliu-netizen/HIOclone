@@ -29,6 +29,7 @@ export class BoltFoodMapper {
       customerPhone: payload.customer?.phone,
       deliveryAddress: payload.deliveryAddress,
       totalPrice: payload.totalPrice,
+      deliveryFee: payload.deliveryFee ?? 0,
       currency: payload.currency,
       items: payload.items.map((item) => ({
         externalId: item.id,

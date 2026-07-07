@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Login from './pages/Login';
+import Overview from './pages/Overview';
 import Orders from './pages/Orders';
 import Fleets from './pages/Fleets';
 import RoutingRules from './pages/RoutingRules';
@@ -26,7 +27,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               </ProtectedRoute>
             }
           >
-            <Route path="/dashboard" element={<Orders />} />
+            <Route path="/dashboard" element={<Overview />} />
+            <Route path="/orders" element={<Orders />} />
             <Route path="/fleets" element={<Fleets />} />
             <Route path="/rules" element={<RoutingRules />} />
             <Route path="/orders/:id" element={<OrderDetails />} />

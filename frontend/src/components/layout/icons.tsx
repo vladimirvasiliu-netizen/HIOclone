@@ -78,3 +78,29 @@ export function IconChevronDoubleLeft({ className }: IconProps) {
     </Svg>
   );
 }
+
+export function IconHome({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <path d="M4 11 12 4l8 7" />
+      <path d="M6 10v9h12v-9" />
+    </Svg>
+  );
+}
+
+export function IconCheck({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <path d="M20 6 9 17l-5-5" />
+    </Svg>
+  );
+}
+
+export function IconClock({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </Svg>
+  );
+}

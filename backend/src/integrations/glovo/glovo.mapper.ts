@@ -28,6 +28,7 @@ export class GlovoMapper {
       customerPhone: payload.customer?.phone_number,
       deliveryAddress: payload.delivery_address,
       totalPrice: payload.order_total_price,
+      deliveryFee: payload.delivery_fee ?? 0,
       currency: payload.currency_code,
       items: payload.order_items.map((item) => ({
         externalId: item.id,
