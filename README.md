@@ -1,13 +1,42 @@
-# Platforma de integrare Bolt Food + Glovo
+# ZangConnect — Platforma de integrare Bolt Food + Glovo
 
 Platforma care centralizeaza comenzile venite de la **Bolt Food** si **Glovo**
-intr-un singur dashboard, cu status unificat pentru fiecare comanda.
+intr-un singur dashboard (**ZangConnect**), cu status unificat pentru fiecare
+comanda, autentificare, un app shell (sidebar + topbar) si pagini dedicate
+pentru flote si reguli de rutare.
 
 ## Stack tehnic
 
-- **Backend**: Node.js 20 LTS, TypeScript, NestJS, PostgreSQL (TypeORM)
-- **Frontend**: React 18 + TypeScript, Vite, Tailwind CSS
-- **Faza 1**: doar primire comenzi + actualizare status (fara sincronizare meniu / analytics — se pot adauga ulterior)
+- **Backend**: Node.js 20 LTS, TypeScript, NestJS, PostgreSQL (TypeORM), Swagger,
+  `@nestjs/schedule` (polling), `class-validator` (validare DTO)
+- **Frontend**: React 18 + TypeScript, Vite, Tailwind CSS, React Router (`react-router-dom`)
+
+## Functionalitati
+
+- **Autentificare mock** — pagina de login, sesiune pastrata in `localStorage`
+  (persista la refresh), rute protejate, deconectare
+- **App shell** — sidebar colapsabil cu navigatie grupata (iconite + etichete) si
+  topbar cu titlu derivat din ruta, cautare, notificari si meniu de utilizator
+- **Dashboard comenzi unificat** — comenzi Bolt Food + Glovo intr-un singur loc,
+  cu filtrare, actualizare status si pagina de detaliu
+- **Notificari mock interactive** — badge cu numarul de necitite, text ingrosat cat
+  sunt necitite, iar la click te duc la comanda / pagina relevanta
+- **Control distributie comenzi** — doua slidere legate (Glovo / Bolt Food) care
+  regleaza proportia comenzilor generate; suma e mereu 100%
+- **Pagini Flote si Reguli de rutare** — vizualizari cu date mock (de dezvoltat)
+- **Simulator de comenzi** — generator de comenzi false pentru testare, fara API-uri reale
+
+## Autentificare
+
+Autentificarea este **mock** (nu exista backend real de auth). Credentiale demo:
+
+```
+email:  admin@hio.ro
+parola: password123
+```
+
+La login se salveaza un obiect user + un token fals in `localStorage`; rutele
+autentificate sunt protejate si redirectioneaza catre `/login` fara sesiune.
 
 ## Cum functioneaza integrarea
 
@@ -33,16 +62,27 @@ integration-platform/
 ├── backend/                     # NestJS + TypeORM + PostgreSQL
 │   └── src/
 │       ├── common/               # enums + interfata UnifiedOrder
-│       ├── orders/                # entitati, service, controller (CRUD comenzi)
+│       ├── orders/               # entitati, service, controller (CRUD comenzi)
+│       ├── simulator/            # generator comenzi false + distributie pe provider
 │       └── integrations/
-│           ├── bolt-food/         # client, mapper, service (polling)
-│           └── glovo/             # client, mapper, service, controller (webhook)
-└── frontend/                     # React + Vite + Tailwind
+│           ├── bolt-food/        # client, mapper, service (polling)
+│           └── glovo/            # client, mapper, service, controller (webhook)
+└── frontend/                    # React + Vite + Tailwind + React Router
     └── src/
-        ├── api/                   # apeluri catre backend
-        ├── hooks/                 # polling comenzi (useOrders)
-        └── components/            # OrderCard, OrderList, FilterBar, badges
+        ├── api/                  # apeluri catre backend (orders, simulator)
+        ├── context/              # AuthContext (autentificare mock)
+        ├── hooks/                # useOrders, useSimulator, useClickOutside
+        ├── pages/                # Login, Orders, OrderDetails, Fleets, RoutingRules
+        └── components/
+            ├── layout/           # Layout (<Outlet>), Sidebar, Topbar, navConfig, icons
+            ├── ProtectedRoute    # gardian pentru rutele autentificate
+            ├── ProviderMixControl# slidere distributie comenzi
+            └── OrderCard, OrderList, FilterBar, badges
 ```
+
+Shell-ul (sidebar + topbar) e aplicat tuturor paginilor autentificate prin
+**rute imbricate**: paginile sunt copii ai componentei `Layout`, care le randeaza
+in `<Outlet>`.
 
 ## Instalare & rulare
 
@@ -61,7 +101,7 @@ cd backend
 cp .env.example .env
 # editeaza .env cu datele tale de PostgreSQL (si, cand le ai, credentialele Bolt Food / Glovo)
 npm install
-npm run start:dev
+npm run dev        # echivalent cu start:dev (pornire cu auto-reload)
 ```
 
 Backend-ul porneste pe `http://localhost:3000`, iar documentatia Swagger e disponibila
@@ -77,7 +117,8 @@ npm install
 npm run dev
 ```
 
-Frontend-ul porneste pe `http://localhost:5173`.
+Frontend-ul porneste pe `http://localhost:5173`. Autentifica-te cu credentialele
+demo de mai sus.
 
 ## Endpoint-uri principale
 
@@ -89,7 +130,8 @@ Frontend-ul porneste pe `http://localhost:5173`.
 | POST | `/integrations/glovo/webhook` | Endpoint pentru notificari Glovo (configurat in panoul lor de partener) |
 | POST | `/simulator/start` | Porneste generarea automata de comenzi false (pentru testare) |
 | POST | `/simulator/stop` | Opreste generarea automata de comenzi |
-| GET | `/simulator/status` | Starea curenta a simulatorului (pornit/oprit, cate comenzi a generat) |
+| GET | `/simulator/status` | Starea simulatorului (pornit/oprit, cate comenzi a generat, distributia curenta) |
+| POST | `/simulator/mix` | Seteaza distributia comenzilor generate (procent Glovo; Bolt Food = restul) |
 
 ## Simulator de comenzi (pentru testare, fara credentiale reale)
 
@@ -97,9 +139,12 @@ Din dashboard, butoanele **"Start comenzi" / "Stop comenzi"** pornesc/opresc un
 generator care creeaza comenzi false, dar plauzibile (nume, adrese, produse de
 meniu cu preturi reale, timp estimativ de livrare), direct in baza de date -
 util pentru a vedea fluxul complet inainte sa ai acces la Bolt Food / Glovo.
-Cand pornesti simulatorul, o comanda noua apare la fiecare 8-18 secunde,
-alternand intre cele doua platforme. Codul e in `backend/src/simulator/` si
-poate fi sters usor cand nu mai e nevoie de el.
+Cand pornesti simulatorul, o comanda noua apare la fiecare 8-18 secunde.
+
+Proportia dintre platforme e controlata din pagina **Comenzi**, prin cele doua
+slidere **Glovo / Bolt Food** (suma mereu 100%). Backend-ul alege platforma
+fiecarei comenzi ponderat, dupa distributia setata. Codul e in
+`backend/src/simulator/` si poate fi sters usor cand nu mai e nevoie de el.
 
 ## Ce trebuie completat cand ai acces la API-urile reale
 
@@ -114,9 +159,13 @@ poate fi sters usor cand nu mai e nevoie de el.
    - `glovo.service.ts`: numele exact al header-ului de semnatura si algoritmul de verificare
    - `glovo.mapper.ts`: maparea corecta a statusurilor Glovo -> `OrderStatus`
 
-## Urmatorii pasi posibili (nu sunt inclusi in aceasta faza)
+3. **Autentificare**: inlocuieste logica mock din `frontend/src/context/AuthContext.tsx`
+   cu un flux real (verificare pe backend, token emis de server).
 
+## Urmatorii pasi posibili
+
+- Continut real pentru paginile Flote si Reguli de rutare (acum au date mock)
 - Sincronizare meniu/produse cu ambele platforme
 - Notificari in timp real catre frontend (WebSocket) in loc de polling
 - Rapoarte/analytics (volum comenzi, timp mediu de preparare, etc.)
-- Autentificare/roluri pentru dashboard
+- Roluri si permisiuni pentru dashboard
