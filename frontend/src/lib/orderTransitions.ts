@@ -36,6 +36,16 @@ export function isInProgress(status: OrderStatus): boolean {
   return IN_PROGRESS_STATUSES.includes(status);
 }
 
+/** Fluxul liniar "fericit" al unei comenzi, folosit de indicatorul de pasi (stepper). */
+export const STATUS_FLOW: OrderStatus[] = [
+  'NEW',
+  'ACCEPTED',
+  'IN_PREPARATION',
+  'READY_FOR_PICKUP',
+  'PICKED_UP',
+  'DELIVERED',
+];
+
 export interface StatusAction {
   status: OrderStatus;
   label: string;

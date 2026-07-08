@@ -8,11 +8,11 @@ import { IconOrders, IconCheck, IconFleets, IconClock } from '../components/layo
 // Statusuri "finale" - o comanda in aceste stari nu mai e activa.
 const TERMINAL_STATUSES: OrderStatus[] = ['DELIVERED', 'CANCELLED', 'REJECTED'];
 
-// Partea retinuta de fiecare platforma DIN COSTUL DE LIVRARE.
+// Partea retinuta de fiecare platforma DIN COSTUL DE LIVRARE (mai mare decat a noastra).
 // Platforma noastra e remunerata din restul livrarii, nu din totalul comenzii.
 const COMMISSION_RATE: Record<OrderPlatform, number> = {
-  GLOVO: 0.3,
-  BOLT_FOOD: 0.28,
+  GLOVO: 0.7,
+  BOLT_FOOD: 0.68,
 };
 
 /** Formateaza o suma in RON, cu 2 zecimale. */
@@ -195,8 +195,8 @@ export default function Overview() {
         )}
 
         <p className="mt-3 text-xs text-slate-400">
-          Suntem remunerati doar dintr-un procent din livrare. Partea platformelor: Glovo 30%,
-          Bolt Food 28% din livrare. Se exclud comenzile anulate/respinse.
+          Suntem remunerati doar dintr-un procent din livrare. Partea platformelor: Glovo 70%,
+          Bolt Food 68% din livrare (restul e venitul nostru). Se exclud comenzile anulate/respinse.
         </p>
       </div>
 

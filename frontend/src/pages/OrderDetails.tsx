@@ -4,6 +4,7 @@ import { getOrder, updateOrderStatus } from '../api/ordersApi';
 import type { Order, OrderStatus } from '../types/order';
 import { PlatformBadge } from '../components/PlatformBadge';
 import { StatusBadge } from '../components/StatusBadge';
+import { OrderStatusStepper } from '../components/OrderStatusStepper';
 import { allowedActions, STATUS_LABELS } from '../lib/orderTransitions';
 
 export default function OrderDetails() {
@@ -123,6 +124,14 @@ export default function OrderDetails() {
                   {order.currency} cu livrare)
                 </span>
               </p>
+            </div>
+
+            {/* Progres comanda - indicator de pasi (stepper) */}
+            <div className="mt-4 border-t border-slate-100 pt-3">
+              <h3 className="mb-3 text-sm font-semibold text-slate-800">Progres comanda</h3>
+              <div className="overflow-x-auto pb-1">
+                <OrderStatusStepper status={order.status} />
+              </div>
             </div>
 
             {/* Istoric status: ora fiecarei tranzitii */}

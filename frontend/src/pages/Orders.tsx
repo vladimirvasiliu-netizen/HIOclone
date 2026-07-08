@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useOrders } from '../hooks/useOrders';
 import { updateOrderStatus } from '../api/ordersApi';
 import { FilterBar } from '../components/FilterBar';
-import { OrderList } from '../components/OrderList';
+import { OrderTable } from '../components/OrderTable';
+import { OrderDetailPanel } from '../components/OrderDetailPanel';
 import { SimulatorControls } from '../components/SimulatorControls';
 import { ProviderMixControl } from '../components/ProviderMixControl';
 import type { OrderPlatform, OrderStatus } from '../types/order';
@@ -11,6 +12,9 @@ export default function Orders() {
   const [platform, setPlatform] = useState<OrderPlatform | undefined>(undefined);
   const [status, setStatus] = useState<OrderStatus | undefined>(undefined);
 
+  const [search, setSearch] = useState('');
+  const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
+
   const { orders, isLoading, error, refetch } = useOrders({ platform, status });
 
   const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
@@ -18,17 +22,39 @@ export default function Orders() {
     await refetch();
   };
 
+  // Cautare dupa numele clientului sau ID-ul comenzii (peste rezultatele filtrate).
+  const query = search.trim().toLowerCase();
+  const visibleOrders = query
+    ? orders.filter(
+        (o) =>
+          o.externalOrderId.toLowerCase().includes(query) ||
+          (o.customerName ?? '').toLowerCase().includes(query),
+      )
+    : orders;
+
   const newOrdersCount = orders.filter((o) => o.status === 'NEW').length;
+
+  // Comanda selectata pentru panou (cautata in toate comenzile, dupa id).
+  const selectedOrder = orders.find((o) => o.id === selectedId) ?? null;
 
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <FilterBar
-          platform={platform}
-          status={status}
-          onPlatformChange={setPlatform}
-          onStatusChange={setStatus}
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Cauta dupa client sau ID..."
+            className="w-56 rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <FilterBar
+            platform={platform}
+            status={status}
+            onPlatformChange={setPlatform}
+            onStatusChange={setStatus}
+          />
+        </div>
         <div className="flex items-center gap-3">
           <SimulatorControls />
           {newOrdersCount > 0 && (
@@ -60,8 +86,18 @@ export default function Orders() {
           Se incarca comenzile...
         </div>
       ) : (
-        <OrderList orders={orders} onStatusChange={handleStatusChange} />
+        <OrderTable
+          orders={visibleOrders}
+          selectedId={selectedId}
+          onSelect={(order) => setSelectedId(order.id)}
+        />
       )}
+
+      <OrderDetailPanel
+        order={selectedOrder}
+        onClose={() => setSelectedId(undefined)}
+        onStatusChange={handleStatusChange}
+      />
     </div>
   );
 }
