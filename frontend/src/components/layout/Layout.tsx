@@ -45,6 +45,14 @@ export function Layout() {
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar />
         <main className="relative flex-1 overflow-y-auto px-6 py-6">
+          {/* Efect ambiental continuu: pete de culoare estompate care plutesc lent.
+              Discret, in spatele imaginii de fundal si al continutului. */}
+          <div aria-hidden className="ambient pointer-events-none fixed inset-0 overflow-hidden">
+            <span className="ambient-blob ambient-blob-1" />
+            <span className="ambient-blob ambient-blob-2" />
+            <span className="ambient-blob ambient-blob-3" />
+          </div>
+
           {/* Fundal reprezentativ pe pagina: fixat in spate, foarte estompat,
               cu pointer-events-none ca sa nu interfereze cu clickurile. */}
           {background && (

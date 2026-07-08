@@ -19,6 +19,68 @@ main .bg-white {
 }
 
 /*
+ * Efect ambiental: pete de culoare mari, estompate, care se plimba de-a lungul
+ * marginilor in sens invers acelor de ceasornic. Centrul fiecarei pete sta pe
+ * muchia ecranului, deci se vede doar ca o aura pe margine (nu traverseaza
+ * centrul). Cele 3 pete sunt decalate ca sa fie raspandite pe perimetru.
+ */
+.ambient-blob {
+  position: absolute;
+  top: -16vw; /* centrul (dimensiune 32vw) ajunge pe coltul stanga-sus */
+  left: -16vw;
+  height: 32vw;
+  width: 32vw;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.35;
+  will-change: transform;
+  /* Orbita in sens invers acelor de ceasornic (TL -> BL -> BR -> TR -> TL). */
+  animation: ambient-orbit-ccw 60s linear infinite;
+}
+.ambient-blob-1 {
+  background: #60a5fa; /* albastru */
+  animation-delay: 0s;
+}
+.ambient-blob-2 {
+  background: #f0abfc; /* roz */
+  animation-delay: -20s;
+}
+.ambient-blob-3 {
+  background: #34d399; /* verde */
+  animation-delay: -40s;
+}
+
+@keyframes ambient-orbit-ccw {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(0, 100vh);
+  }
+  50% {
+    transform: translate(100vw, 100vh);
+  }
+  75% {
+    transform: translate(100vw, 0);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* In tema intunecata petele sunt putin mai discrete. */
+.dark .ambient-blob {
+  opacity: 0.22;
+}
+
+/* Respectam preferinta de reducere a miscarii (accesibilitate). */
+@media (prefers-reduced-motion: reduce) {
+  .ambient-blob {
+    animation: none;
+  }
+}
+
+/*
  * ================= TEMA INTUNECATA =================
  * Se activeaza prin clasa `dark` pe <html> (pusa de pagina Setari / la pornire).
  * In loc sa rescriem fiecare componenta cu variante `dark:`, suprascriem aici
