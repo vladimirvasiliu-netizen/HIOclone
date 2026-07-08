@@ -1,11 +1,11 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useOrders } from '../hooks/useOrders';
 import { updateOrderStatus } from '../api/ordersApi';
 import { FilterBar } from '../components/FilterBar';
 import { OrderTable } from '../components/OrderTable';
 import { OrderDetailPanel } from '../components/OrderDetailPanel';
 import { SimulatorControls } from '../components/SimulatorControls';
-import { ProviderMixControl } from '../components/ProviderMixControl';
 import type { OrderPlatform, OrderStatus } from '../types/order';
 
 export default function Orders() {
@@ -57,22 +57,20 @@ export default function Orders() {
         </div>
         <div className="flex items-center gap-3">
           <SimulatorControls />
+          <Link
+            to="/fleets"
+            title="Regleaza proportia Glovo / Bolt Food (pagina Flote)"
+            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
+          >
+            Distributie comenzi
+            <span aria-hidden>→</span>
+          </Link>
           {newOrdersCount > 0 && (
             <span className="rounded-full bg-blue-600 px-3 py-1 text-sm font-medium text-white">
               {newOrdersCount} comenzi noi
             </span>
           )}
-          <button
-            onClick={() => refetch()}
-            className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
-          >
-            Reincarca
-          </button>
         </div>
-      </div>
-
-      <div className="mb-4 max-w-md">
-        <ProviderMixControl />
       </div>
 
       {error && (

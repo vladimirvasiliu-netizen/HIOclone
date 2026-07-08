@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { NAV_GROUPS } from './navConfig';
 import { IconChevronDoubleLeft } from './icons';
 
@@ -14,13 +14,17 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         collapsed ? 'w-16' : 'w-64'
       }`}
     >
-      {/* Brand */}
-      <div className="flex h-16 items-center gap-2 border-b border-slate-200 px-4">
+      {/* Brand - link catre prezentarea generala */}
+      <Link
+        to="/dashboard"
+        title="Prezentare generala"
+        className="flex h-16 items-center gap-2 border-b border-slate-200 px-4 transition-colors hover:bg-slate-50"
+      >
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">
           Z
         </div>
         {!collapsed && <span className="font-semibold text-slate-800">ZangConnect</span>}
-      </div>
+      </Link>
 
       {/* Navigatie grupata */}
       <nav className="flex-1 space-y-6 overflow-y-auto px-2 py-4">

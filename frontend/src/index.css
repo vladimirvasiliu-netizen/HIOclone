@@ -5,3 +5,15 @@
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
+
+/*
+ * Carduri/tabele semi-transparente DOAR in zona de continut (<main>),
+ * ca imaginea de fundal a paginii sa se vada prin ele. Textul si iconitele
+ * nu sunt afectate - transparenta e doar pe fundalul containerului.
+ * Selectorul "main .bg-white" e mai specific decat utilitarul ".bg-white"
+ * al lui Tailwind, deci il suprascrie fara sa atinga sidebar-ul/topbar-ul.
+ */
+main .bg-white {
+  background-color: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(2px);
+}

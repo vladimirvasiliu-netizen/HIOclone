@@ -79,6 +79,15 @@ export function IconChevronDoubleLeft({ className }: IconProps) {
   );
 }
 
+export function IconCouriers({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6" />
+    </Svg>
+  );
+}
+
 export function IconHome({ className }: IconProps) {
   return (
     <Svg className={className}>
@@ -101,6 +110,34 @@ export function IconClock({ className }: IconProps) {
     <Svg className={className}>
       <circle cx="12" cy="12" r="9" />
       <path d="M12 7v5l3 2" />
+    </Svg>
+  );
+}
+
+export function IconCoin({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <circle cx="12" cy="12" r="8" />
+      <path d="M12 8v8M9.5 10a2.2 2.2 0 0 1 2.5-1.6M9.5 14a2.2 2.2 0 0 0 2.5 1.6" />
+    </Svg>
+  );
+}
+
+export function IconRoute({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <circle cx="6" cy="18" r="2.5" />
+      <circle cx="18" cy="6" r="2.5" />
+      <path d="M8.5 18H14a4 4 0 0 0 0-8H10a4 4 0 0 1 0-8h-.5" transform="translate(0 2)" />
+    </Svg>
+  );
+}
+
+export function IconShield({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" />
+      <path d="M9 12l2 2 4-4" />
     </Svg>
   );
 }

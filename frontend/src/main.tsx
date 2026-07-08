@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Login from './pages/Login';
 import Overview from './pages/Overview';
 import Orders from './pages/Orders';
+import Drivers from './pages/Drivers';
 import Fleets from './pages/Fleets';
 import RoutingRules from './pages/RoutingRules';
 import OrderDetails from './pages/OrderDetails';
@@ -29,6 +30,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           >
             <Route path="/dashboard" element={<Overview />} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/drivers" element={<Drivers />} />
             <Route path="/fleets" element={<Fleets />} />
             <Route path="/rules" element={<RoutingRules />} />
             <Route path="/orders/:id" element={<OrderDetails />} />

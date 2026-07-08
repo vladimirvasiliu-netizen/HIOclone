@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" fill="none" stroke="#334155" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M180 220 h240 l-20 240 a20 20 0 0 1 -20 18 h-140 a20 20 0 0 1 -20 -18 z"/>
+  <path d="M240 220 v-30 a60 60 0 0 1 120 0 v30"/>
+  <line x1="230" y1="300" x2="370" y2="300"/>
+  <line x1="235" y1="350" x2="365" y2="350"/>
+  <line x1="245" y1="400" x2="355" y2="400"/>
+</svg>
