@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
+import { applyDarkTheme, readStoredDarkTheme } from '../lib/theme';
 
 /**
  * Credentiale MOCK (nu exista backend real de autentificare).
@@ -25,6 +26,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  updateProfile: (profile: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -61,11 +63,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newSession));
     setSession(newSession);
+    applyDarkTheme(readStoredDarkTheme()); // la login, restauram tema salvata
   };
 
   const logout = () => {
     localStorage.removeItem(STORAGE_KEY);
     setSession(null);
+    applyDarkTheme(false); // la delogare revenim mereu la tema deschisa
+  };
+
+  // Actualizeaza datele de profil (nume/email) in sesiunea curenta si le
+  // persista, ca topbar-ul si orice alt consumator sa reflecte schimbarea.
+  const updateProfile = (profile: Partial<User>) => {
+    setSession((prev) => {
+      if (!prev) return prev;
+      const next: Session = { ...prev, user: { ...prev.user, ...profile } };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
   };
 
   const value: AuthContextValue = {
@@ -73,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated: session !== null,
     login,
     logout,
+    updateProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

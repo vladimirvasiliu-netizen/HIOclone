@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { IconHome, IconOrders, IconFleets, IconCouriers, IconRules } from './icons';
+import { IconHome, IconOrders, IconFleets, IconCouriers, IconRules, IconSettings } from './icons';
 
 export interface NavItem {
   label: string;
@@ -29,7 +29,10 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     title: 'Configurare',
-    items: [{ label: 'Reguli de rutare', path: '/rules', icon: <IconRules /> }],
+    items: [
+      { label: 'Reguli de rutare', path: '/rules', icon: <IconRules /> },
+      { label: 'Setari', path: '/settings', icon: <IconSettings /> },
+    ],
   },
 ];
 

@@ -17,3 +17,121 @@ main .bg-white {
   background-color: rgba(255, 255, 255, 0.62);
   backdrop-filter: blur(2px);
 }
+
+/*
+ * ================= TEMA INTUNECATA =================
+ * Se activeaza prin clasa `dark` pe <html> (pusa de pagina Setari / la pornire).
+ * In loc sa rescriem fiecare componenta cu variante `dark:`, suprascriem aici
+ * culorile structurale ale utilitarilor Tailwind folositi in aplicatie.
+ * Selectorii `.dark .clasa` sunt mai specifici decat utilitarul simplu, deci
+ * castiga. Badge-urile colorate (bg-*-100) raman ca accente.
+ */
+html.dark {
+  color-scheme: dark;
+}
+html.dark body {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+/* Fundaluri */
+.dark .bg-white {
+  background-color: #1e293b;
+}
+.dark .bg-slate-50 {
+  background-color: #0f172a;
+}
+.dark .bg-slate-100 {
+  background-color: #334155;
+}
+
+/* Carduri/tabele din zona de continut - translucide, ca fundalul sa se vada */
+.dark main .bg-white {
+  background-color: rgba(30, 41, 59, 0.72);
+}
+.dark main .bg-slate-50 {
+  background-color: rgba(15, 23, 42, 0.5);
+}
+
+/* Text */
+.dark .text-slate-900 {
+  color: #f1f5f9;
+}
+.dark .text-slate-800 {
+  color: #e2e8f0;
+}
+.dark .text-slate-700 {
+  color: #cbd5e1;
+}
+.dark .text-slate-600 {
+  color: #cbd5e1;
+}
+.dark .text-slate-500 {
+  color: #94a3b8;
+}
+.dark .text-slate-400 {
+  color: #94a3b8;
+}
+
+/* Borduri */
+.dark .border-slate-200 {
+  border-color: #334155;
+}
+.dark .border-slate-100 {
+  border-color: #1e293b;
+}
+.dark .border-slate-300 {
+  border-color: #475569;
+}
+.dark .divide-slate-100 > * + * {
+  border-color: #1e293b;
+}
+.dark .divide-slate-50 > * + * {
+  border-color: #172033;
+}
+
+/* Stari de hover uzuale */
+.dark .hover\:bg-slate-100:hover {
+  background-color: #334155;
+}
+.dark .hover\:bg-slate-50:hover {
+  background-color: #263449;
+}
+
+/* Accente albastre discrete (nav activ, rand selectat) */
+.dark .bg-blue-50 {
+  background-color: rgba(59, 130, 246, 0.15);
+}
+
+/* Accente de text luminate, ca sa fie distinctive pe fundal intunecat
+   (cifre de venit, linkuri, sume nete). */
+.dark .text-blue-600 {
+  color: #60a5fa;
+}
+.dark .text-green-600 {
+  color: #4ade80;
+}
+.dark .text-red-600 {
+  color: #f87171;
+}
+.dark .text-emerald-700 {
+  color: #6ee7b7;
+}
+
+/* Campuri de formular (fara slidere range, ca sa nu stricam accent-color) */
+.dark input:not([type='range']),
+.dark select,
+.dark textarea {
+  background-color: #0f172a;
+  border-color: #475569;
+  color: #e2e8f0;
+}
+.dark input::placeholder {
+  color: #64748b;
+}
+
+/* Ilustratia de fundal: inversam liniile inchise ca sa se vada pe fundal negru */
+.dark .page-bg {
+  filter: invert(1);
+  opacity: 0.12;
+}

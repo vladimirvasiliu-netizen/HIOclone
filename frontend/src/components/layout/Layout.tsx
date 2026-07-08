@@ -50,7 +50,7 @@ export function Layout() {
           {background && (
             <div
               aria-hidden
-              className="pointer-events-none fixed inset-0 bg-center bg-no-repeat opacity-[0.24]"
+              className="page-bg pointer-events-none fixed inset-0 bg-center bg-no-repeat opacity-[0.24]"
               style={{
                 backgroundImage: `url("${background}")`,
                 backgroundSize: 'min(70vmin, 640px)',
