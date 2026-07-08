@@ -2,8 +2,9 @@
 
 Platforma care centralizeaza comenzile venite de la **Bolt Food** si **Glovo**
 intr-un singur dashboard (**ZangConnect**), cu status unificat pentru fiecare
-comanda, autentificare, un app shell (sidebar + topbar) si pagini dedicate
-pentru flote si reguli de rutare.
+comanda, autentificare, un app shell (sidebar + topbar), o pagina de prezentare
+generala cu statistici in timp real si venituri, o vedere de management a
+comenzilor si pagini dedicate pentru flote si reguli de rutare.
 
 ## Stack tehnic
 
@@ -17,10 +18,19 @@ pentru flote si reguli de rutare.
   (persista la refresh), rute protejate, deconectare
 - **App shell** — sidebar colapsabil cu navigatie grupata (iconite + etichete) si
   topbar cu titlu derivat din ruta, cautare, notificari si meniu de utilizator
-- **Dashboard comenzi unificat** — comenzi Bolt Food + Glovo intr-un singur loc,
-  cu filtrare, actualizare status si pagina de detaliu
+- **Prezentare generala (Overview)** — aterizarea dupa login: KPI-uri calculate in
+  timp real din comenzi (active, livrate azi, in livrare, timp mediu livrare), feed
+  de activitate recenta si un panou de **venituri din intermediere** (calculat doar
+  din costul de livrare, cu detaliu extensibil pe fiecare comanda)
+- **Management comenzi** — tabel cu coloane (id, client, platforma, valoare, status,
+  ora), cautare dupa client / numar comanda, filtre pe platforma si status, iar la
+  click pe un rand se deschide un panou lateral (drawer) cu detaliile comenzii
+- **Masina de stari a comenzii** — tranzitii controlate (noua -> acceptata ->
+  in preparare -> gata de ridicare -> ridicata -> livrata; anulare pe parcurs),
+  indicator de pasi (stepper), istoric status cu timestamp si cost de livrare
 - **Notificari mock interactive** — badge cu numarul de necitite, text ingrosat cat
-  sunt necitite, iar la click te duc la comanda / pagina relevanta
+  sunt necitite (stare pastrata per utilizator), iar la click te duc la comanda
+  relevanta (cu numarul ei) sau la pagina potrivita
 - **Control distributie comenzi** — doua slidere legate (Glovo / Bolt Food) care
   regleaza proportia comenzilor generate; suma e mereu 100%
 - **Pagini Flote si Reguli de rutare** — vizualizari cu date mock (de dezvoltat)
@@ -72,12 +82,16 @@ integration-platform/
         ├── api/                  # apeluri catre backend (orders, simulator)
         ├── context/              # AuthContext (autentificare mock)
         ├── hooks/                # useOrders, useSimulator, useClickOutside
-        ├── pages/                # Login, Orders, OrderDetails, Fleets, RoutingRules
+        ├── lib/                  # orderTransitions (masina de stari + etichete status)
+        ├── pages/                # Login, Overview, Orders, OrderDetails, Fleets, RoutingRules
         └── components/
             ├── layout/           # Layout (<Outlet>), Sidebar, Topbar, navConfig, icons
             ├── ProtectedRoute    # gardian pentru rutele autentificate
             ├── ProviderMixControl# slidere distributie comenzi
-            └── OrderCard, OrderList, FilterBar, badges
+            ├── OrderTable        # tabelul de comenzi (randuri clicabile)
+            ├── OrderDetailPanel  # panou lateral (drawer) cu detaliile unei comenzi
+            ├── OrderStatusStepper# indicator de pasi pentru statusul comenzii
+            └── FilterBar, StatusBadge, PlatformBadge
 ```
 
 Shell-ul (sidebar + topbar) e aplicat tuturor paginilor autentificate prin
@@ -137,7 +151,7 @@ demo de mai sus.
 
 Din dashboard, butoanele **"Start comenzi" / "Stop comenzi"** pornesc/opresc un
 generator care creeaza comenzi false, dar plauzibile (nume, adrese, produse de
-meniu cu preturi reale, timp estimativ de livrare), direct in baza de date -
+meniu cu preturi reale, timp estimativ de livrare, cost de livrare), direct in baza de date -
 util pentru a vedea fluxul complet inainte sa ai acces la Bolt Food / Glovo.
 Cand pornesti simulatorul, o comanda noua apare la fiecare 8-18 secunde.
 
