@@ -4,7 +4,8 @@ Platforma care centralizeaza comenzile venite de la **Bolt Food** si **Glovo**
 intr-un singur dashboard (**ZangConnect**), cu status unificat pentru fiecare
 comanda, autentificare, un app shell (sidebar + topbar), o pagina de prezentare
 generala cu statistici in timp real si venituri, o vedere de management a
-comenzilor si pagini dedicate pentru flote si reguli de rutare.
+comenzilor, o pagina de curieri, flote cu statistici si reguli de rutare
+configurabile.
 
 ## Stack tehnic
 
@@ -32,8 +33,18 @@ comenzilor si pagini dedicate pentru flote si reguli de rutare.
   sunt necitite (stare pastrata per utilizator), iar la click te duc la comanda
   relevanta (cu numarul ei) sau la pagina potrivita
 - **Control distributie comenzi** — doua slidere legate (Glovo / Bolt Food) care
-  regleaza proportia comenzilor generate; suma e mereu 100%
-- **Pagini Flote si Reguli de rutare** — vizualizari cu date mock (de dezvoltat)
+  regleaza proportia comenzilor generate; suma e mereu 100% (in pagina Flote, cu
+  shortcut din pagina Comenzi)
+- **Curieri** — tabel cu curieri mock, cautare dupa nume, filtre clicabile pe
+  status (online / ocupat / offline) si pe tip de vehicul, comutare rapida a
+  statusului
+- **Flote** — statistici agregate (livratori activi, timp estimativ de livrare,
+  cost mediu) si pe fiecare flota, plus fiabilitate in timp real
+- **Reguli de rutare configurabile** — 4 criterii reglabile (SLA, pret livrare,
+  distanta, fiabilitate flota), fiecare cu activare/dezactivare, slider de valoare
+  si pondere in decizie; setarile se pastreaza local (`localStorage`)
+- **Fundaluri per pagina** — ilustratii SVG reprezentative, estompate in spate, cu
+  carduri/tabele semi-transparente ca fundalul sa se vada fara sa afecteze textul
 - **Simulator de comenzi** — generator de comenzi false pentru testare, fara API-uri reale
 
 ## Autentificare
@@ -83,7 +94,7 @@ integration-platform/
         ├── context/              # AuthContext (autentificare mock)
         ├── hooks/                # useOrders, useSimulator, useClickOutside
         ├── lib/                  # orderTransitions (masina de stari + etichete status)
-        ├── pages/                # Login, Overview, Orders, OrderDetails, Fleets, RoutingRules
+        ├── pages/                # Login, Overview, Orders, OrderDetails, Drivers, Fleets, RoutingRules
         └── components/
             ├── layout/           # Layout (<Outlet>), Sidebar, Topbar, navConfig, icons
             ├── ProtectedRoute    # gardian pentru rutele autentificate
