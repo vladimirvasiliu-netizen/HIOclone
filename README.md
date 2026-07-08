@@ -4,8 +4,8 @@ Platforma care centralizeaza comenzile venite de la **Bolt Food** si **Glovo**
 intr-un singur dashboard (**ZangConnect**), cu status unificat pentru fiecare
 comanda, autentificare, un app shell (sidebar + topbar), o pagina de prezentare
 generala cu statistici in timp real si venituri, o vedere de management a
-comenzilor, o pagina de curieri, flote cu statistici si reguli de rutare
-configurabile.
+comenzilor, o pagina de curieri, flote cu statistici, reguli de rutare
+configurabile, o pagina de setari si tema intunecata.
 
 ## Stack tehnic
 
@@ -45,6 +45,13 @@ configurabile.
   si pondere in decizie; setarile se pastreaza local (`localStorage`)
 - **Fundaluri per pagina** — ilustratii SVG reprezentative, estompate in spate, cu
   carduri/tabele semi-transparente ca fundalul sa se vada fara sa afecteze textul
+- **Setari** — pagina cu doua tab-uri tip pill (fara reincarcare): Profil (nume /
+  email editabile, avatar cu initiale, buton de salvare care se reflecta si in
+  topbar) si Preferinte (comutatoare pentru notificari, tema intunecata, rezumat
+  pe email); preferintele se pastreaza in `localStorage`
+- **Tema intunecata** — comutabila din Setari, aplicata pe toata aplicatia si
+  pastrata la refresh; la delogare revine automat la tema deschisa, iar la
+  re-logare se restaureaza preferinta salvata
 - **Simulator de comenzi** — generator de comenzi false pentru testare, fara API-uri reale
 
 ## Autentificare
@@ -93,8 +100,8 @@ integration-platform/
         ├── api/                  # apeluri catre backend (orders, simulator)
         ├── context/              # AuthContext (autentificare mock)
         ├── hooks/                # useOrders, useSimulator, useClickOutside
-        ├── lib/                  # orderTransitions (masina de stari + etichete status)
-        ├── pages/                # Login, Overview, Orders, OrderDetails, Drivers, Fleets, RoutingRules
+        ├── lib/                  # orderTransitions (masina de stari) + theme (tema light/dark)
+        ├── pages/                # Login, Overview, Orders, OrderDetails, Drivers, Fleets, RoutingRules, Settings
         └── components/
             ├── layout/           # Layout (<Outlet>), Sidebar, Topbar, navConfig, icons
             ├── ProtectedRoute    # gardian pentru rutele autentificate
