@@ -11,6 +11,8 @@ configurabile, o pagina de setari si tema intunecata.
 
 - **Backend**: Node.js 20 LTS, TypeScript, NestJS, PostgreSQL (TypeORM), Swagger,
   `@nestjs/schedule` (polling), `class-validator` (validare DTO)
+- **Server curieri**: Express standalone (date in memorie) — un mic API REST
+  separat, pe portul 4000, care alimenteaza pagina Curieri
 - **Frontend**: React 18 + TypeScript, Vite, Tailwind CSS, React Router (`react-router-dom`)
 
 ## Functionalitati
@@ -35,9 +37,10 @@ configurabile, o pagina de setari si tema intunecata.
 - **Control distributie comenzi** — doua slidere legate (Glovo / Bolt Food) care
   regleaza proportia comenzilor generate; suma e mereu 100% (in pagina Flote, cu
   shortcut din pagina Comenzi)
-- **Curieri** — tabel cu curieri mock, cautare dupa nume, filtre clicabile pe
-  status (online / ocupat / offline) si pe tip de vehicul, comutare rapida a
-  statusului
+- **Curieri** — tabel alimentat de un **server Express standalone** (nu date
+  statice): incarcare din API cu indicator de loading si stare de eroare vizibila,
+  cautare dupa nume, filtre clicabile pe status si pe tip de vehicul, adaugare
+  (POST), stergere (DELETE) si schimbarea statusului direct din tabel (PATCH)
 - **Flote** — statistici agregate (livratori activi, timp estimativ de livrare,
   cost mediu) si pe fiecare flota, plus fiabilitate in timp real
 - **Reguli de rutare configurabile** — 4 criterii reglabile (SLA, pret livrare,
@@ -95,11 +98,13 @@ integration-platform/
 │       └── integrations/
 │           ├── bolt-food/        # client, mapper, service (polling)
 │           └── glovo/            # client, mapper, service, controller (webhook)
+├── drivers-server/              # server Express standalone (curieri, date in memorie)
+│   └── server.js                # GET/POST/PATCH/DELETE /drivers, port 4000
 └── frontend/                    # React + Vite + Tailwind + React Router
     └── src/
-        ├── api/                  # apeluri catre backend (orders, simulator)
+        ├── api/                  # apeluri HTTP (ordersApi, simulatorApi, driversApi)
         ├── context/              # AuthContext (autentificare mock)
-        ├── hooks/                # useOrders, useSimulator, useClickOutside
+        ├── hooks/                # useOrders, useSimulator, useDrivers, useClickOutside
         ├── lib/                  # orderTransitions (masina de stari) + theme (tema light/dark)
         ├── pages/                # Login, Overview, Orders, OrderDetails, Drivers, Fleets, RoutingRules, Settings
         └── components/
@@ -140,7 +145,21 @@ Backend-ul porneste pe `http://localhost:3000`, iar documentatia Swagger e dispo
 pe `http://localhost:3000/docs`. `synchronize: true` (setat implicit in `.env.example`)
 creeaza automat tabelele in dev — **dezactiveaza-l in productie** si foloseste migratii.
 
-### 3. Frontend
+### 3. Server curieri (Express)
+
+Pagina Curieri se alimenteaza dintr-un server Express separat (date in memorie,
+fara baza de date):
+
+```bash
+cd drivers-server
+npm install
+npm run dev        # sau: npm start
+```
+
+Ruleaza independent pe `http://localhost:4000`. Nu are nevoie de PostgreSQL;
+datele se reseteaza la restart.
+
+### 4. Frontend
 
 ```bash
 cd frontend
@@ -150,9 +169,12 @@ npm run dev
 ```
 
 Frontend-ul porneste pe `http://localhost:5173`. Autentifica-te cu credentialele
-demo de mai sus.
+demo de mai sus. Cele trei procese (backend 3000, server curieri 4000, frontend
+5173) ruleaza in acelasi timp, fiecare in terminalul lui.
 
 ## Endpoint-uri principale
+
+### Backend NestJS (`http://localhost:3000`)
 
 | Metoda | Ruta | Descriere |
 |---|---|---|
@@ -164,6 +186,15 @@ demo de mai sus.
 | POST | `/simulator/stop` | Opreste generarea automata de comenzi |
 | GET | `/simulator/status` | Starea simulatorului (pornit/oprit, cate comenzi a generat, distributia curenta) |
 | POST | `/simulator/mix` | Seteaza distributia comenzilor generate (procent Glovo; Bolt Food = restul) |
+
+### Server curieri Express (`http://localhost:4000`)
+
+| Metoda | Ruta | Descriere |
+|---|---|---|
+| GET | `/drivers` | Listeaza toti curierii |
+| POST | `/drivers` | Creeaza un curier (`{ name, vehicle, status?, deliveriesToday? }`) |
+| PATCH | `/drivers/:id` | Modifica un curier (doar campurile trimise) |
+| DELETE | `/drivers/:id` | Sterge un curier dupa id |
 
 ## Simulator de comenzi (pentru testare, fara credentiale reale)
 
