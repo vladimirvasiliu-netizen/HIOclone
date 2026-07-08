@@ -40,6 +40,21 @@ export async function createDriver(payload: NewDriver): Promise<Driver> {
   return response.json();
 }
 
+export async function updateDriver(
+  id: number,
+  patch: Partial<Omit<Driver, 'id'>>,
+): Promise<Driver> {
+  const response = await fetch(`${API_BASE_URL}/drivers/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  });
+  if (!response.ok) {
+    throw new Error(`Nu am putut modifica curierul (status ${response.status})`);
+  }
+  return response.json();
+}
+
 export async function deleteDriver(id: number): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/drivers/${id}`, { method: 'DELETE' });
   if (!response.ok) {

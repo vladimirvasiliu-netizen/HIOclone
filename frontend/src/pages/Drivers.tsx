@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useDrivers } from '../hooks/useDrivers';
-import { createDriver, deleteDriver, type DriverStatus } from '../api/driversApi';
+import { createDriver, deleteDriver, updateDriver, type DriverStatus } from '../api/driversApi';
 
 const STATUS_META: Record<DriverStatus, { label: string; badge: string }> = {
   online: { label: 'Online', badge: 'bg-green-100 text-green-700' },
@@ -52,6 +52,16 @@ export default function Drivers() {
       setActionError(err instanceof Error ? err.message : 'Eroare la adaugare');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const changeStatus = async (id: number, status: DriverStatus) => {
+    setActionError(null);
+    try {
+      await updateDriver(id, { status });
+      await refetch(); // lista reflecta ce a salvat serverul
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Eroare la modificare');
     }
   };
 
@@ -226,11 +236,18 @@ export default function Drivers() {
                     <td className="px-4 py-2.5 text-slate-800">{d.name}</td>
                     <td className="px-4 py-2.5 text-slate-600">{d.vehicle}</td>
                     <td className="px-4 py-2.5">
-                      <span
-                        className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${STATUS_META[d.status].badge}`}
+                      {/* Schimbi statusul dintr-un click -> PATCH pe server */}
+                      <select
+                        value={d.status}
+                        onChange={(e) => changeStatus(d.id, e.target.value as DriverStatus)}
+                        className={`cursor-pointer rounded-md border-0 px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 ${STATUS_META[d.status].badge}`}
                       >
-                        {STATUS_META[d.status].label}
-                      </span>
+                        {(Object.keys(STATUS_META) as DriverStatus[]).map((s) => (
+                          <option key={s} value={s}>
+                            {STATUS_META[s].label}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="px-4 py-2.5 text-right text-slate-700">{d.deliveriesToday}</td>
                     <td className="px-4 py-2.5 text-right">

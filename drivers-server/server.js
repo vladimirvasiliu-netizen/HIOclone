@@ -55,6 +55,22 @@ app.post('/drivers', (req, res) => {
   res.status(201).json(driver);
 });
 
+// PATCH /drivers/:id - modifica un curier existent (doar campurile trimise).
+// Body: orice combinatie de { name, vehicle, status, deliveriesToday }
+app.patch('/drivers/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const driver = drivers.find((d) => d.id === id);
+  if (!driver) {
+    return res.status(404).json({ message: 'Curier inexistent.' });
+  }
+  const { name, vehicle, status, deliveriesToday } = req.body || {};
+  if (name !== undefined) driver.name = name;
+  if (vehicle !== undefined) driver.vehicle = vehicle;
+  if (status !== undefined) driver.status = status;
+  if (deliveriesToday !== undefined) driver.deliveriesToday = Number(deliveriesToday);
+  res.json(driver);
+});
+
 // DELETE /drivers/:id - sterge un curier dupa id.
 app.delete('/drivers/:id', (req, res) => {
   const id = Number(req.params.id);
