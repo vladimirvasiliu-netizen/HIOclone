@@ -1,30 +1,6 @@
 import { useMemo, useState } from 'react';
-
-type DriverStatus = 'online' | 'busy' | 'offline';
-
-interface Driver {
-  id: number;
-  name: string;
-  vehicle: string;
-  status: DriverStatus;
-  deliveriesToday: number;
-}
-
-// 12 curieri mock (fara backend).
-const INITIAL_DRIVERS: Driver[] = [
-  { id: 1, name: 'Andrei Popescu', vehicle: 'Scuter', status: 'online', deliveriesToday: 12 },
-  { id: 2, name: 'Maria Ionescu', vehicle: 'Bicicleta', status: 'busy', deliveriesToday: 8 },
-  { id: 3, name: 'Cristian Dumitru', vehicle: 'Masina', status: 'offline', deliveriesToday: 0 },
-  { id: 4, name: 'Elena Radu', vehicle: 'Scuter', status: 'online', deliveriesToday: 15 },
-  { id: 5, name: 'Alexandru Stan', vehicle: 'Bicicleta', status: 'online', deliveriesToday: 6 },
-  { id: 6, name: 'Ioana Munteanu', vehicle: 'Pe jos', status: 'busy', deliveriesToday: 4 },
-  { id: 7, name: 'Bogdan Constantin', vehicle: 'Masina', status: 'offline', deliveriesToday: 2 },
-  { id: 8, name: 'Ana Marinescu', vehicle: 'Scuter', status: 'online', deliveriesToday: 11 },
-  { id: 9, name: 'Florin Gheorghe', vehicle: 'Bicicleta', status: 'busy', deliveriesToday: 9 },
-  { id: 10, name: 'Diana Petrescu', vehicle: 'Masina', status: 'online', deliveriesToday: 7 },
-  { id: 11, name: 'Radu Voicu', vehicle: 'Scuter', status: 'offline', deliveriesToday: 1 },
-  { id: 12, name: 'Gabriela Sandu', vehicle: 'Bicicleta', status: 'online', deliveriesToday: 13 },
-];
+import { useDrivers } from '../hooks/useDrivers';
+import { createDriver, deleteDriver, type DriverStatus } from '../api/driversApi';
 
 const STATUS_META: Record<DriverStatus, { label: string; badge: string }> = {
   online: { label: 'Online', badge: 'bg-green-100 text-green-700' },
@@ -32,28 +8,29 @@ const STATUS_META: Record<DriverStatus, { label: string; badge: string }> = {
   offline: { label: 'Offline', badge: 'bg-slate-200 text-slate-600' },
 };
 
+const VEHICLE_OPTIONS = ['Scuter', 'Bicicleta', 'Masina', 'Pe jos'];
+
 export default function Drivers() {
-  const [drivers, setDrivers] = useState<Driver[]>(INITIAL_DRIVERS);
+  const { drivers, isLoading, error, refetch } = useDrivers();
+
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<DriverStatus | ''>('');
   const [vehicleFilter, setVehicleFilter] = useState('');
 
-  // Lista de vehicule pentru dropdown - derivata din date, fara dubluri.
+  // Formular de adaugare (POST).
+  const [newName, setNewName] = useState('');
+  const [newVehicle, setNewVehicle] = useState(VEHICLE_OPTIONS[0]);
+  const [newStatus, setNewStatus] = useState<DriverStatus>('online');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  // Optiunile de vehicul pentru filtru - derivate din datele primite.
   const vehicles = useMemo(
-    () => Array.from(new Set(INITIAL_DRIVERS.map((d) => d.vehicle))),
-    [],
+    () => Array.from(new Set(drivers.map((d) => d.vehicle))),
+    [drivers],
   );
 
-  // Comuta online <-> offline (un curier "ocupat" trece pe offline).
-  const toggleStatus = (id: number) => {
-    setDrivers((prev) =>
-      prev.map((d) =>
-        d.id === id ? { ...d, status: d.status === 'offline' ? 'online' : 'offline' } : d,
-      ),
-    );
-  };
-
-  // Sumar pe status - se recalculeaza automat la fiecare comutare.
+  // Sumar pe status.
   const counts = useMemo(
     () => ({
       online: drivers.filter((d) => d.status === 'online').length,
@@ -62,6 +39,31 @@ export default function Drivers() {
     }),
     [drivers],
   );
+
+  const addDriver = async () => {
+    if (!newName.trim()) return;
+    setIsSubmitting(true);
+    setActionError(null);
+    try {
+      await createDriver({ name: newName.trim(), vehicle: newVehicle, status: newStatus });
+      setNewName('');
+      await refetch(); // lista reflecta ce a salvat serverul
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Eroare la adaugare');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const removeDriver = async (id: number) => {
+    setActionError(null);
+    try {
+      await deleteDriver(id);
+      await refetch();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Eroare la stergere');
+    }
+  };
 
   const query = search.trim().toLowerCase();
   const visibleDrivers = drivers.filter(
@@ -73,8 +75,7 @@ export default function Drivers() {
 
   return (
     <div className="space-y-4">
-      {/* Sumar pe status - fiecare cartonas e un buton de filtrare.
-          Click pe cel activ il deselecteaza (afiseaza toti curierii). */}
+      {/* Sumar pe status - fiecare cartonas e un buton de filtrare. */}
       <div className="flex flex-wrap gap-3">
         {(Object.keys(STATUS_META) as DriverStatus[]).map((s) => {
           const active = statusFilter === s;
@@ -97,7 +98,7 @@ export default function Drivers() {
         })}
       </div>
 
-      {/* Cautare dupa nume */}
+      {/* Cautare + filtru vehicul */}
       <div className="flex flex-wrap items-center gap-3">
         <input
           type="search"
@@ -128,56 +129,125 @@ export default function Drivers() {
         )}
       </div>
 
-      {/* Tabel */}
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-        <table className="w-full min-w-[40rem] text-sm">
-          <thead>
-            <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-400">
-              <th className="px-4 py-2 font-medium">Nume</th>
-              <th className="px-4 py-2 font-medium">Vehicul</th>
-              <th className="px-4 py-2 font-medium">Status</th>
-              <th className="px-4 py-2 text-right font-medium">Livrari azi</th>
-              <th className="px-4 py-2 text-right font-medium">Actiune</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visibleDrivers.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
-                  Niciun curier pentru criteriile selectate.
-                </td>
+      {/* Formular adaugare curier (POST) */}
+      <div className="flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div>
+          <label className="mb-1 block text-xs text-slate-500">Nume</label>
+          <input
+            type="text"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Nume curier"
+            className="w-48 rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs text-slate-500">Vehicul</label>
+          <select
+            value={newVehicle}
+            onChange={(e) => setNewVehicle(e.target.value)}
+            className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm"
+          >
+            {VEHICLE_OPTIONS.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="mb-1 block text-xs text-slate-500">Status</label>
+          <select
+            value={newStatus}
+            onChange={(e) => setNewStatus(e.target.value as DriverStatus)}
+            className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm"
+          >
+            {(Object.keys(STATUS_META) as DriverStatus[]).map((s) => (
+              <option key={s} value={s}>
+                {STATUS_META[s].label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button
+          onClick={addDriver}
+          disabled={isSubmitting || !newName.trim()}
+          className="rounded-md bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        >
+          {isSubmitting ? 'Se adauga...' : 'Adauga curier'}
+        </button>
+      </div>
+
+      {/* Eroare la actiuni (create/delete) */}
+      {actionError && (
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+          {actionError}
+        </div>
+      )}
+
+      {/* Continut: loading / eroare / tabel */}
+      {isLoading ? (
+        <div className="flex h-48 items-center justify-center text-slate-400">
+          Se incarca curierii...
+        </div>
+      ) : error ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-6 text-center text-sm text-red-700">
+          <p className="font-medium">Nu am putut incarca curierii.</p>
+          <p className="mt-1 text-red-600">{error}</p>
+          <button
+            onClick={() => refetch()}
+            className="mt-3 rounded-md border border-red-300 bg-white px-3 py-1.5 text-sm text-red-700 hover:bg-red-100"
+          >
+            Reincearca
+          </button>
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+          <table className="w-full min-w-[40rem] text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-400">
+                <th className="px-4 py-2 font-medium">Nume</th>
+                <th className="px-4 py-2 font-medium">Vehicul</th>
+                <th className="px-4 py-2 font-medium">Status</th>
+                <th className="px-4 py-2 text-right font-medium">Livrari azi</th>
+                <th className="px-4 py-2 text-right font-medium">Actiune</th>
               </tr>
-            ) : (
-              visibleDrivers.map((d) => (
-                <tr key={d.id} className="border-b border-slate-50 last:border-0">
-                  <td className="px-4 py-2.5 text-slate-800">{d.name}</td>
-                  <td className="px-4 py-2.5 text-slate-600">{d.vehicle}</td>
-                  <td className="px-4 py-2.5">
-                    <span
-                      className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${STATUS_META[d.status].badge}`}
-                    >
-                      {STATUS_META[d.status].label}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2.5 text-right text-slate-700">{d.deliveriesToday}</td>
-                  <td className="px-4 py-2.5 text-right">
-                    <button
-                      onClick={() => toggleStatus(d.id)}
-                      className={`rounded-md px-3 py-1 text-xs font-medium text-white ${
-                        d.status === 'offline'
-                          ? 'bg-green-600 hover:bg-green-700'
-                          : 'bg-slate-600 hover:bg-slate-700'
-                      }`}
-                    >
-                      {d.status === 'offline' ? 'Seteaza online' : 'Seteaza offline'}
-                    </button>
+            </thead>
+            <tbody>
+              {visibleDrivers.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
+                    Niciun curier pentru criteriile selectate.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ) : (
+                visibleDrivers.map((d) => (
+                  <tr key={d.id} className="border-b border-slate-50 last:border-0">
+                    <td className="px-4 py-2.5 text-slate-800">{d.name}</td>
+                    <td className="px-4 py-2.5 text-slate-600">{d.vehicle}</td>
+                    <td className="px-4 py-2.5">
+                      <span
+                        className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${STATUS_META[d.status].badge}`}
+                      >
+                        {STATUS_META[d.status].label}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-right text-slate-700">{d.deliveriesToday}</td>
+                    <td className="px-4 py-2.5 text-right">
+                      <button
+                        onClick={() => removeDriver(d.id)}
+                        className="rounded-md border border-red-200 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                      >
+                        Sterge
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
